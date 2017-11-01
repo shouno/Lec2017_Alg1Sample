@@ -40,8 +40,8 @@ List GetNewLCell(void)
 void FreeLCell(List p)
 {
     // 使い終わった p は，次に使えるように FListLcell に登録
-	p->next = FListLcell; 
-	FListLcell = p;
+    p->next = FListLcell; 
+    FListLcell = p;
 }
 
 
@@ -50,8 +50,8 @@ int main(void)
 	List p[10];
 	int i;
 
-	p[0] = GetNewLCell();
-	p[1] = GetNewLCell();
+    p[0] = GetNewLCell();
+    p[1] = GetNewLCell();
 	FreeLCell(p[0]);
 	p[2] = GetNewLCell();
 	p[3] = GetNewLCell();
