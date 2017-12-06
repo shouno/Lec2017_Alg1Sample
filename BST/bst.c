@@ -27,8 +27,27 @@ ElementType minElm(BTnode *T)
 }
 
 
+BTnode* minNode(BTnode *T)
+{
+    BTnode *L;
+
+    if (T == NULL) return NULL;  /* error! */
+    while ((L = T->left) != NULL) T = L;  // 最も左の値を探索．再帰なしで
+    return T;
+}
+
+	
+
 #define TRUE 1
 #define FALSE 0
+
+int IsLeaf(BTnode *T)
+{
+	if(T == NULL)	return FALSE;
+	if(T->left == NULL && T->right==NULL)	return TRUE;
+	else return FALSE;
+}
+
 
 int member(ElementType x, BTnode *T)
 {
@@ -47,6 +66,8 @@ int member(ElementType x, BTnode *T)
 }
 
 
+// INSERT の実装方法2つ．原理は同じだけど呼び出し方が違うので注意(main関数参照)
+// 直接探し出して付け加える
 BTnode *INSERT(ElementType x, BTnode **p)
 {
     ElementType e;
@@ -59,6 +80,27 @@ BTnode *INSERT(ElementType x, BTnode **p)
     *p = q = GetNewBTCell();
     q->element = x,  q->left = q->right = NULL;
     return q;
+}
+
+
+// 再帰を使った実装
+BTnode *insert(ElementType x, BTnode *p)
+{
+	ElementType e;
+	if(p == NULL){
+		BTnode *q = GetNewBTCell();
+		q->element = x;
+		q->left = q->right = NULL;
+		return q;
+	}
+	e = p->element;
+	if(x < e){ // x が小さい
+		p->left = insert(x, p->left);
+	}
+	else if(x > e){
+		p->right = insert(x, p->right);
+	}
+	return p;
 }
 
 
@@ -83,6 +125,7 @@ ElementType DeleteMin(BTnode **p)
 }
 
 
+// DELETE の実装方法2つ．原理は同じだけど呼び出し方が違うので注意(main関数参照)
 int DELETE(ElementType x, BTnode **p)
 {
     ElementType e;
@@ -94,11 +137,43 @@ int DELETE(ElementType x, BTnode **p)
 			else if(q->left == NULL) *p = q->right;
 			else {
 				q->element = DeleteMin(&q->right);
-				return 1;  }
+				return TRUE;
+			}
 			FreeBTCell(q);
-			return 1;
-		} else p = x < e ? &q->left : &q->right;
-    return 0;  // なかった
+			return TRUE;
+		} else
+			p = x < e ? &q->left : &q->right;
+    return FALSE;  // なかった
+}
+
+
+BTnode* delete(ElementType x, BTnode *p)
+{
+	if(p == NULL)	return NULL;
+	if(x < p->element)
+		p->left = delete(x, p->left);
+	else if(x > p->element)
+		p->right = delete(x, p->right);
+	else{ // 消すノードがいた場合
+		BTnode *q;
+		ElementType tmp;
+		
+		if(p->left == NULL){ // 左に子がいなければ右を上げる
+			q = p->right;
+			FreeBTCell(p);
+			return q;
+		}
+		else if(p->right == NULL){ // 右に子がいなければ左を上げる
+			q = p->left;
+			FreeBTCell(p);
+			return q;
+		}
+		// 右部分木の最も小さいのを引き上げた上で，そのノードを消去
+		tmp = minElm(p->right);
+		p->element = tmp;
+		p->right = delete(tmp, p->right);
+	}
+	return p;
 }
 
 
@@ -132,6 +207,26 @@ int main(int ac, char **av)
 			PrintTree(pTree, 0);
 		} else INSERT(av[i][0], &pTree);
     }
+	printf("final tree\n");
+    PrintTree(pTree, 0);
+
+	// insert, delete の別実装
+	printf("another insert/delete implementation\n");
+    for (i = 1; i < ac; i++) {
+        if ((c = av[i][0]) == '-') {
+			PrintTree(pTree, 0);
+			printf("*** deleting %c\n", av[i][1]);
+			pTree = delete(av[i][1], pTree);
+			PrintTree(pTree, 0);
+		}
+		else{
+			if(pTree == NULL)	pTree = insert(av[i][0], NULL);
+			else{
+				insert(av[i][0], pTree);
+			}
+		}
+	}
+	printf("final tree\n");
     PrintTree(pTree, 0);
 
 	return 0;

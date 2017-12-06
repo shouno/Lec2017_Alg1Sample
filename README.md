@@ -12,4 +12,5 @@ Algorithm Samples in Lecture 2017 Shouno Class
 * `huffman/hcode.c`: テキストをハフマン符合化する
 * `huffman/hdecode.c`: 与えられたハフマン符合を復号する（未完）
 * `BST/bst.c`: 標準入力に与えられた文字を2分探索木とする
+* `trie/trie.c`: トライの実装例（村尾先生から）
 
