@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 typedef unsigned int uint;
 typedef unsigned char uchar;
 
-#define MAXCHCODE 256
+#define MAXCHCODE 256  // 文字コードの種類は最大で256種類(8bitなので）
 
-/*  ASCII 1文字に対するハフマン符号を表す構造体  */
+//  ASCII 1文字に対するハフマン符号を表す構造体 
 struct hcode {
 	uint bitl;	/*  ビット数  */
 	uchar *bits;	/*  ビット列へのポインタ  */
@@ -15,7 +16,7 @@ struct hcode {
 struct hcode hcodes[MAXCHCODE+1];
 /*  8ビットで表される ASCII文字 256字分と EOFの分の、ハフマン符号の表  */
 
-char *CodeBits;		/*  実際にビット列を入れておく場所  */
+uchar *CodeBits;		/*  実際にビット列を入れておく場所  */
 
 /*  文字(コード)と直後の ':'までを読み込む  */
 int readchar(FILE *f)
@@ -51,12 +52,15 @@ void gethcodes(char *fn)
 	for (i = 0; i < MAXCHCODE; i++) hcodes[i].bitl = 0;
 	/*  ファイルの先頭行に書かれた、表の文字数と最大のビット数を読み込む  */
 	fscanf(f, "%d chars, max %d bits\n", &nchars, &bitl);
+
+    printf( "nchars: %d, bitl: %d\n", nchars, bitl);
+
 	/*  最大ビット長のコードを記憶するのに必要なバイト数  */
 	i = bitl >> 3;
 	if ((bitl&7) != 0) i++;
 	/*  ビット列を記憶するための領域を確保。
 		(最大ビット長の場合のバイト数)*(文字数)のバイト数だけ確保  */
-	p = CodeBits = (char *)malloc(nchars*i);
+	p = CodeBits = (uchar *)malloc(nchars*i);
 	/**/
 	for (i = 0; i < nchars; i++) {
 		ch = readchar(f);		/*  文字を(':'まで)読み込む  */

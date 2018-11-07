@@ -1,8 +1,6 @@
 //
 // 指定されたファイルを 8 bit 文字列として読み込み，
-// 各文字の出現頻度を数え上げ，
-// Huffman Tree を作成し，
-// 各文字に割り当てられた符号(Huffman符号) を出力
+// 各文字の出現頻度を数え上げる，
 //
 
 
@@ -16,8 +14,10 @@
 static int freq[MAXCHKINDS]; // 出現頻度記録用配列
 extern char *optarg;
 
+
 void init_chcount(void)
 {
+    // 記録用配列 freq の初期化
 	int c;
 	for(c = 0; c < MAXCHKINDS; c++){
 		freq[c] = 0;

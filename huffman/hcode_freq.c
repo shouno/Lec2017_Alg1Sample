@@ -5,14 +5,15 @@
 // 各文字に割り当てられた符号(Huffman符号) を出力
 //
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
 
-#define MAXCHKINDS 257
 typedef unsigned int uint;
+
+#define MAXCHKINDS 257
+
 typedef struct elm {
 	// Huffmann Tree に格納するデータ構造
 	uint freq;  // 出現頻度
@@ -89,10 +90,10 @@ void printchar(int c)
 		printf("\\\\");
 	}
 	else if(isprint(c)){
-		printf("%c", c);
+		printf("%4c", c);
 	}
 	else{
-		printf("\\%03o", c);
+		printf("\\%04o", c);
 	}
 }
 
@@ -102,18 +103,18 @@ void makeInitialForest(void)
 	int c;
 
 	for(c = 0; c < MAXCHKINDS; c++){
-		// if(freq[c] > 0 && isalpha(c)){ // アルファベットのみを対象にする場合コメントアウト
-		if(freq[c] > 0){
+		if(freq[c] > 0 && isalpha(c)){ // アルファベットのみを対象にする
+            //全ての文字を対象にする場合は isalpha(c) を取り除く
 			Hforest[nFTrees++] = makeNode(c, freq[c], NULL, NULL);
 		}
 	}
-	// アルファベットのみを対象にする場合は以下をコメントアウト
-	Hforest[nFTrees++] = makeNode(EOF, 1, NULL, NULL); // EOF は一回だけ出現
+	// EOF も扱いたい場合は以下をコメントアウト
+	// Hforest[nFTrees++] = makeNode(EOF, 1, NULL, NULL);
 }
 
 
-// 現在の森の中から最小の頻度となる木を選び出す．二つの木の持つ添字は *id1, *id2 へ
-// 格納し，呼び出し元で使う
+// 現在の森の中から最小の頻度となる木を2つ選び出す．
+// 2つの木の持つ添字は *id1, *id2 へ格納，呼び出し元で使う
 void get2LeastIndices(uint *id1, uint *id2)
 {
 	uint i1, i2, i, f1, f2, f;
@@ -238,8 +239,32 @@ void printHTree(uint lv, HTree *p)
 char codestack[MAXCHKINDS]; 
 
 
+void print_code(uint lev)
+{
+    for(int i = 0; i < lev; i++){
+        putchar(codestack[i]);
+    }
+}
 
-
+void traverse(uint lev, HTree *p)
+{
+    if(IsLeaf(p)){
+        printchar(p->element.ch);
+        printf(":%03d: ", lev);
+        print_code(lev);
+        putchar('\n');
+    }
+    else{
+        if(p->l != NULL){
+            codestack[lev] = '0';
+            traverse(lev+1, p->l);
+        }
+        if(p->r != NULL){
+            codestack[lev] = '1';
+            traverse(lev+1, p->r);
+        }
+    }
+}
 
 extern char *optarg;
 
@@ -278,11 +303,17 @@ int main(int ac, char* av[])
 		nfiles = 1;
 	}
 
+    // ここからが本体
 	makeInitialForest();
 	Nchars = nFTrees;
 	composeHuffmanTree();
 	h = TreeHeight(Hforest[0]);
-	printf("#leaves: %d, tree height=%d\n", Nchars, h);
-	printHTree(0, Hforest[0]);
+    if(dumptree == 1){
+        printf("#leaves: %d, tree height=%d\n", Nchars, h);
+        printHTree(0, Hforest[0]);
+        printf("------\n");
+    }
+    printf("%d chars, max %d bits\n", Nchars, h);
+    traverse(0, Hforest[0]);
 	return 0;
 }
