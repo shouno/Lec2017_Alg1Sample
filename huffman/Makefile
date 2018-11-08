@@ -17,4 +17,4 @@ hcode_freq: hcode_freq.o
 	$(CC) $(CFLAGs) -o $@ $^ $(LIBs)
 
 clean:
-	$(RM) -f *.o *.so *~ *.bak
+	$(RM) -f *.o *.so *~ *.bak freq hcode_freq hencode
