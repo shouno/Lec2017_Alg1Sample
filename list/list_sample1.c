@@ -3,12 +3,11 @@
 
 typedef int elmtype;  // リスト要素で保持するデータ型
 typedef struct __Lcell__ { // リスト要素の構造体
-  struct __Lcell__ *next;
-  elmtype element;
+    struct __Lcell__ *next;
+    elmtype element;
 } Lcell;
 
-typedef Lcell* LcellP; // リスト要素の構造体ポインタ
-typedef LcellP List;   // リスト要素の構造体ポインタを List型とする
+typedef Lcell* List;   // リスト要素の構造体ポインタを List型とする
 
 List GetNewLCell(void);  // セル構造を作って，そのポインタが返ってくる
 void FreeLCell(List p);  // セル構造を破棄する．
@@ -31,10 +30,18 @@ int LisEnd(List p)  // 最後のセルか？とりあえず，型チェックで
 }
 
 
+int LisValid(List p) // 有効なセルか？ 上の LisEnd と統合したいなぁ...
+{
+    if(p != NULL)	return 1;
+    else			return 0;
+}
+
+
 List next(List p)
 {
 	return p->next;
 }
+
 
 
 elmtype Lretrieve(List p) // p の要素を返す
@@ -43,23 +50,41 @@ elmtype Lretrieve(List p) // p の要素を返す
 }
 
 
-List LFirst(List L) // リストの最初，ダミーヘッダはスキップする
+List LFirst(List head) // リストの最初，ダミーヘッダはスキップする
 {
-	return L->next;
+	return head->next;
 }
 
-List LEnd(List L) // リストを最後まで辿って返す
+
+List LLast(List head) // リストを最後まで辿って返す
 {
 	List p;
-	for(p = LFirst(L); !LisEnd(p); p = p->next);
+	for(p = LFirst(head); LisValid(next(p)); p = next(p));
 	return p;
 }
 
 
-List Llocate(elmtype x, List L) // とりあえず x を持つ要素を返すことにしてある
+List prev(List p, List head) // 一個前のセルを指定，最初からたどるしかないので不格好．．．
+{
+    List q;
+    int isFound = 0;
+    for(q = LFirst(head); LisValid(q); q = next(q)){
+        if(p == next(q)){ // 一個前が p であるセルを探す
+            isFound = 1;
+            break;
+        }
+    }
+    if(isFound == 1)	return q;
+    else				return NULL;
+}
+
+
+
+
+List Llocate(elmtype x, List head) // x を持つ要素を返すことにしてある
 {
 	List p;
-	for(p = LFirst(L); p != NULL; p = next(p)){
+	for(p = LFirst(head); LisValid(p); p = next(p)){
 		if(p->element == x)	break;
 	}
 	return p;
@@ -79,13 +104,14 @@ void LDeleteNext(List p) // p の直後のセルを削除
 {
 	List n;
 	n = p->next;
-	if( n != NULL ){
+	if(n != NULL){
 		p->next = n->next;
-		FreeLCell(n);
+		FreeLCell(n); // 確保したメモリ領域の解放
 	}
 }
 
 
+// 作成した関数でテストを行ってみる．
 int main(void)
 {
 	int i;
@@ -100,7 +126,7 @@ int main(void)
 	}
 
 	// とりあえず全部なめてみる
-	for(p = LFirst(L); p != NULL; p = next(p)){
+	for(p = LFirst(L); LisValid(p); p = next(p)){
 		printf( "item: %d\n", Lretrieve(p));
 	}
 
@@ -113,32 +139,20 @@ int main(void)
 	LDeleteNext(p); // 2 が消される
 	
 	// 全部なめてみる
-	for(p = LFirst(L); p != NULL; p = next(p)){
-		printf( "item: %d\n", Lretrieve(p));
+    printf("---Forward Traverse---\n");
+	for(p = LFirst(L); LisValid(p); p = next(p)){
+		printf("item: %d\n", Lretrieve(p));
 	}
 
+    printf("---Backward Traverse---\n");
+    for(p = LLast(L); LisValid(p); p = prev(p, L)){
+		printf("item: %d\n", Lretrieve(p));
+    }
+
 	printf( "\n\n" );
-	p = LEnd(L);
+	p = LLast(L);
 	printf( "item: %d\n", Lretrieve(p));
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -178,5 +192,3 @@ void FreeLCell(List p)
     p->next = FListLcell; 
     FListLcell = p;
 }
-
-

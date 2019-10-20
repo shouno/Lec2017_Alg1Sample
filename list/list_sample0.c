@@ -3,12 +3,11 @@
 
 typedef int elmtype;  // リスト要素で保持するデータ型
 typedef struct __Lcell__ { // リスト要素の構造体
-  struct __Lcell__ *next;
-  elmtype element;
+    struct __Lcell__ *next;
+    elmtype element;
 } Lcell;
 
-typedef Lcell* LcellP; // リスト要素の構造体ポインタ
-typedef LcellP List;   // リスト要素の構造体ポインタを List型とする
+typedef Lcell* List;   // リスト要素の構造体ポインタを List型とする
 
 
 #ifndef PAGESIZE
@@ -45,6 +44,9 @@ void FreeLCell(List p)
 }
 
 
+
+
+// テストしてみる．とりあえず領域確保と解放が動くかを確認
 int main(void)
 {
 	List p[10];
@@ -63,5 +65,5 @@ int main(void)
 	p[7] = GetNewLCell();
 
 	for (i = 0; i < 8; i++)
-		printf("%2d: %p\n", i, p[i]);
+		printf("%2d: %p\n", i, p[i]);  // 保存されているポインタを表示
 }
